@@ -1,5 +1,6 @@
 import kotlin.coroutines.resume
 import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * Interface for the result of asynchronous calculations
@@ -49,6 +50,16 @@ class ContinuationHandler<T>(
     }
 }
 
-suspend fun <T> CompletableFuture<T>.await(): T {
-    TODO()
+suspend fun <T> CompletableFuture<T>.await(): T = suspendCancellableCoroutine { continuation ->
+    if (isDone) {
+        continuation.resume(value)
+        return@suspendCancellableCoroutine
+    }
+
+    val handler = ContinuationHandler(continuation)
+
+    handle(handler)
+    continuation.invokeOnCancellation {
+        cancel()
+    }
 }
