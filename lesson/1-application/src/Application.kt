@@ -15,7 +15,6 @@ fun CoroutineScope.runApplication(
             } catch (e: Exception) {
                 delay(1.seconds)
                 launchApi()
-                e.printStackTrace()
             }
         }
     }
